@@ -1,6 +1,7 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 
+# ✅ Load once at cold start
 tokenizer = None
 generator = None
 
@@ -22,9 +23,10 @@ def load_model():
         device=0 if torch.cuda.is_available() else -1
     )
 
-# Cold start
+# ✅ Cold start load
 load_model()
 
+# ✅ RunPod serverless entrypoint
 def handler(event):
     try:
         job_input = event["input"]
@@ -39,7 +41,7 @@ def handler(event):
             num_return_sequences=1
         )
 
-        return { "output": outputs[0]["generated_text"] }
+        return {"output": outputs[0]["generated_text"]}
 
     except Exception as e:
-        return { "error": str(e) }
+        return {"error": str(e)}
