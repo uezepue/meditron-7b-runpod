@@ -1,14 +1,13 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 
-# ✅ Load once at cold start
 tokenizer = None
 generator = None
 
 def load_model():
     global tokenizer, generator
     model_name = "epfl-llm/meditron-7b"
-    
+
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
@@ -23,10 +22,9 @@ def load_model():
         device=0 if torch.cuda.is_available() else -1
     )
 
-# ✅ Cold start: Load model when container starts
+# Cold start
 load_model()
 
-# ✅ RunPod handler format
 def handler(event):
     try:
         job_input = event["input"]
@@ -40,8 +38,8 @@ def handler(event):
             do_sample=True,
             num_return_sequences=1
         )
-        
-        return {"output": outputs[0]["generated_text"]}
+
+        return { "output": outputs[0]["generated_text"] }
 
     except Exception as e:
-        return {"error": str(e)}
+        return { "error": str(e) }
